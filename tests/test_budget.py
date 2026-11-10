@@ -22,3 +22,38 @@ def test_check_budget():
     assert result.loc[0, "status"] == "Exceeded"
     assert result.loc[1, "actual_expense"] == 300
     assert result.loc[1, "status"] == "Within Budget"
+
+import pytest
+
+
+def test_negative_budget():
+    df = pd.DataFrame({
+        "description": ["Grocery Store"],
+        "amount": [500],
+        "type": ["expense"]
+    })
+
+    with pytest.raises(ValueError):
+        check_budget(df, {"Food": -100})
+
+
+def test_infinite_budget():
+    df = pd.DataFrame({
+        "description": ["Grocery Store"],
+        "amount": [500],
+        "type": ["expense"]
+    })
+
+    with pytest.raises(ValueError):
+        check_budget(df, {"Food": float("inf")})
+
+
+def test_nan_budget():
+    df = pd.DataFrame({
+        "description": ["Grocery Store"],
+        "amount": [500],
+        "type": ["expense"]
+    })
+
+    with pytest.raises(ValueError):
+        check_budget(df, {"Food": float("nan")})

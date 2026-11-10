@@ -1,5 +1,6 @@
 
 import pandas as pd
+import math
 
 
 def categorize_expenses(df):
@@ -40,9 +41,19 @@ def categorize_expenses(df):
 def calculate_total_expenses(df):
     expenses = df[
         df["type"].astype(str).str.strip().str.lower() == "expense"
+    ].copy()
+
+    expenses["amount"] = pd.to_numeric(
+        expenses["amount"], errors="coerce"
+    )
+
+    expenses = expenses[
+    expenses["amount"].apply(
+        lambda x: pd.notna(x) and math.isfinite(x)
+    )
     ]
 
-    return float(pd.to_numeric(expenses["amount"], errors="coerce").sum())
+    return float(expenses["amount"].sum())
 
 
 def calculate_monthly_expenses(df):
@@ -53,7 +64,12 @@ def calculate_monthly_expenses(df):
     expenses["date"] = pd.to_datetime(expenses["date"], errors="coerce")
     expenses["amount"] = pd.to_numeric(expenses["amount"], errors="coerce")
 
+    # Remove rows with missing dates or non-finite amounts
     expenses = expenses.dropna(subset=["date", "amount"])
+    
+    expenses = expenses[
+        expenses["amount"].apply(math.isfinite)
+    ]
 
     expenses["month"] = expenses["date"].dt.strftime("%Y-%m")
 
@@ -68,15 +84,33 @@ def calculate_category_expenses(df):
         df["type"].astype(str).str.strip().str.lower() == "expense"
     ].copy()
 
-    expenses["amount"] = pd.to_numeric(expenses["amount"], errors="coerce")
-    expenses = expenses.dropna(subset=["amount"])
+    expenses["amount"] = pd.to_numeric(
+    expenses["amount"], errors="coerce"
+    )
 
+    # Remove missing and infinite transaction amounts
+    expenses = expenses.dropna(subset=["amount"])
+    expenses = expenses[
+        expenses["amount"].apply(math.isfinite)
+    ]
+    
     return expenses.groupby("category")["amount"].sum()
 
 
 def calculate_total_income(df):
     income = df[
         df["type"].astype(str).str.strip().str.lower() == "income"
+    ].copy()
+
+    income["amount"] = pd.to_numeric(
+        income["amount"], errors="coerce"
+    )
+
+    # Remove missing and infinite income amounts
+    income = income.dropna(subset=["amount"])
+
+    income = income[
+        income["amount"].apply(math.isfinite)
     ]
 
-    return float(pd.to_numeric(income["amount"], errors="coerce").sum())
+    return float(income["amount"].sum())
