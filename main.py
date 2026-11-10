@@ -48,7 +48,7 @@ def main():
     print("\nCategory-wise Expenses:")
     print(category_expenses)
 
-    # Step 5: Check category budgets
+    git diff --cached --name-only# Step 5: Check category budgets
     budgets = {
         "Food": 5000,
         "Transportation": 2000,
