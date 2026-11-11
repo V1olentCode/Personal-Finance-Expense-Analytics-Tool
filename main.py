@@ -10,6 +10,8 @@ from src.analytics import (
 
 from src.budget import check_budget
 
+from src.report_generator import generate_report
+
 
 
 def main():
@@ -62,6 +64,11 @@ def main():
 
     print("\nBudget Analysis:")
     print(budget_results)
+
+    # Step 6: Generate visualizations and PDF report
+    report_path = generate_report(df, budgets=budgets)
+
+    print(f"\nFinancial report generated successfully: {report_path}")
 
     print("\nData processing, analytics and budget analysis completed successfully!")
 
