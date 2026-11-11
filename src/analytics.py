@@ -61,7 +61,11 @@ def calculate_monthly_expenses(df):
         df["type"].astype(str).str.strip().str.lower() == "expense"
     ].copy()
 
-    expenses["date"] = pd.to_datetime(expenses["date"], errors="coerce")
+    expenses["date"] = pd.to_datetime(
+        expenses["date"],
+        format="%d-%m-%y",
+        errors="coerce"
+    )
     expenses["amount"] = pd.to_numeric(expenses["amount"], errors="coerce")
 
     # Remove rows with missing dates or non-finite amounts

@@ -11,7 +11,7 @@ from src.analytics import (
 
 def sample_data():
     return pd.DataFrame({
-        "date": ["2026-10-01", "2026-10-02", "2026-10-03"],
+        "date": ["01-10-26", "02-10-26", "03-10-26"],
         "description": ["Grocery Store", "Uber", "Salary"],
         "amount": [1200, 300, 30000],
         "type": ["expense", "expense", "income"]
@@ -72,9 +72,9 @@ def test_calculate_total_expenses_ignores_non_finite_amounts():
 def test_calculate_monthly_expenses_ignores_non_finite_amounts():
     df = pd.DataFrame({
         "date": [
-            "2026-10-01",
-            "2026-10-02",
-            "2026-10-03"
+        "01-10-26",
+        "02-10-26",
+        "03-10-26"
         ],
         "description": ["Grocery", "Uber", "Restaurant"],
         "amount": [100, float("inf"), float("nan")],
