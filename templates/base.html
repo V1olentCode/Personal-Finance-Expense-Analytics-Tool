@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Finwise{% endblock %} · Personal Finance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar"><a class="brand" href="{{ url_for('web.dashboard') }}"><span class="brand-mark">F</span><span>finwise<span class="brand-dot">.</span></span></a>
+      <div class="nav-caption">WORKSPACE</div><nav>
+        <a class="nav-link {% if request.endpoint == 'web.dashboard' %}active{% endif %}" href="{{ url_for('web.dashboard') }}"><span>◫</span>Overview</a>
+        <a class="nav-link {% if request.endpoint == 'web.transactions' %}active{% endif %}" href="{{ url_for('web.transactions') }}"><span>↔</span>Transactions</a>
+        <a class="nav-link {% if request.endpoint == 'web.budgets' %}active{% endif %}" href="{{ url_for('web.budgets') }}"><span>◷</span>Budgets</a>
+      </nav>
+      <div class="side-bottom"><div class="side-tip"><div class="tip-icon">✦</div><strong>Small steps add up.</strong><p>Stay on top of your spending, one month at a time.</p></div><div class="profile"><div class="avatar">PF</div><div><strong>My finances</strong><small>Personal account</small></div><span class="profile-menu">···</span></div></div>
+    </aside>
+    <main class="main"><header class="topbar"><div><div class="eyebrow">PERSONAL FINANCE</div><h1>{% block heading %}Overview{% endblock %}</h1></div><div class="top-actions"><a class="icon-button" href="{{ url_for('web.report_download', month=request.values.get('month','')) }}" title="Download PDF report">↓</a><div class="user-avatar">P</div></div></header>
+      {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flashes">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body></html>
