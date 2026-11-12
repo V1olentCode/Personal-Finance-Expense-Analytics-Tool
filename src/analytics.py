@@ -101,10 +101,15 @@ def calculate_category_expenses(df):
     return expenses.groupby("category")["amount"].sum()
 
 
+
 def calculate_total_income(df):
     income = df[
         df["type"].astype(str).str.strip().str.lower() == "income"
     ].copy()
+
+    # No income transactions
+    if income.empty:
+        return 0.0
 
     income["amount"] = pd.to_numeric(
         income["amount"], errors="coerce"
