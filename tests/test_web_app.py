@@ -39,7 +39,9 @@ def upload(client, rows="2026-10-01,Grocery Store,1200,expense\n"):
 def test_dashboard_loads_empty_dataset(client):
     response = client.get("/?month=2026-10")
     assert response.status_code == 200
-    assert b"Good to see you" in response.data
+    assert b"Welcome back." in response.data
+    assert b"YOUR FINANCIAL SPACE" in response.data
+    assert b"Your finances, thoughtfully organized." in response.data
     assert "Monthly Overview — October 2026".encode("utf-8") in response.data
     assert b"Monthly income" in response.data
     assert b"Monthly expenses" in response.data

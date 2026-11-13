@@ -1,4 +1,31 @@
-{% extends 'base.html' %}{% block title %}Budgets{% endblock %}{% block heading %}Budget planner{% endblock %}
-{% block content %}<section class="welcome-row"><p class="muted">Set category limits and keep spending on track.</p><form class="month-form" method="get"><label for="month">MONTH</label><input id="month" name="month" type="month" value="{{ month }}"><button class="button secondary">View</button></form></section>
-<section class="budget-layout"><article class="panel"><div class="panel-heading"><div><h2>Create or update a budget</h2><p>Budgets apply only to the selected month.</p></div></div><form class="budget-form" method="post"><input type="hidden" name="month" value="{{ month }}"><label>Category<select name="category" required>{% for category in categories %}<option>{{ category }}</option>{% endfor %}</select></label><label>Monthly limit (₹)<input name="amount" type="number" min="0" step="0.01" placeholder="e.g. 5000" required></label><button class="button primary">Save budget</button></form></article>
-<article class="panel"><div class="panel-heading"><div><h2>Budget progress</h2><p>{{ month }}</p></div></div>{% if budget_results %}<div class="budget-list">{% for row in budget_results %}<div class="budget-item"><div class="budget-label"><strong>{{ row.category }}</strong><span class="status {{ 'exceeded' if row.status == 'Exceeded' else '' }}">{{ row.status }}</span></div><div class="budget-label detail"><span>Spent ₹{{ '%.2f'|format(row.actual_expense) }}</span><span>Limit ₹{{ '%.2f'|format(row.budget) }}</span></div><div class="progress"><span class="{% if row.status == 'Exceeded' %}over{% endif %}" style="width:{{ [((row.actual_expense / row.budget * 100) if row.budget else (100 if row.actual_expense else 0)), 100]|min }}%"></span></div><small class="muted">₹{{ '%.2f'|format(row.remaining_budget) }} remaining</small></div>{% endfor %}</div>{% else %}<div class="empty-inline">No budgets for {{ month }} yet.</div>{% endif %}</article></section>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Budgets{% endblock %}
+{% block heading %}Budget planner{% endblock %}
+{% block content %}
+<section class="page-intro budget-intro"><div><p class="page-description">Plan category limits and keep spending aligned with your goals.</p></div><form class="month-form" method="get"><label for="month">MONTH</label><input id="month" name="month" type="month" value="{{ month }}"><button class="button button-secondary" type="submit">View month</button></form></section>
+
+<section class="budget-page-grid">
+  <article class="panel budget-editor" aria-labelledby="budget-editor-title">
+    <div class="panel-heading"><div><span class="section-kicker">MONTHLY PLAN</span><h2 id="budget-editor-title">Create or update a budget</h2><p>Set a category limit for {{ month }}. Saving an existing category updates its limit.</p></div></div>
+    <form class="budget-form" method="post">
+      <input type="hidden" name="month" value="{{ month }}">
+      <label for="budget-category">Category<select id="budget-category" name="category" required>{% for category in categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}</select></label>
+      <label for="budget-amount">Monthly limit <span class="field-hint">INR</span><input id="budget-amount" name="amount" type="number" min="0" step="0.01" placeholder="e.g. 5,000" required></label>
+      <button class="button button-primary" type="submit">Save monthly budget <span aria-hidden="true">→</span></button>
+    </form>
+    <div class="editor-footnote"><span class="footnote-check" aria-hidden="true">✓</span>Budgets are tracked separately for each month.</div>
+  </article>
+
+  <section class="panel budget-progress-panel" aria-labelledby="budget-progress-title">
+    <div class="panel-heading panel-heading-spaced"><div><span class="section-kicker">SPENDING LIMITS</span><h2 id="budget-progress-title">Budget progress</h2><p>Actual spending in {{ month }}.</p></div><span class="month-tag">{{ month }}</span></div>
+    {% if budget_results %}<div class="budget-cards">{% for row in budget_results %}{% set percent = ((row.actual_expense / row.budget * 100) if row.budget else (100 if row.actual_expense else 0)) %}{% set approaching = percent >= 80 and row.status != 'Exceeded' %}
+      <article class="budget-card {% if row.status == 'Exceeded' %}budget-exceeded{% elif approaching %}budget-approaching{% endif %}">
+        <div class="budget-card-top"><div class="budget-category-mark" aria-hidden="true">{{ row.category[:1] }}</div><div class="budget-category-copy"><h3>{{ row.category }}</h3><span class="budget-state {% if row.status == 'Exceeded' %}state-exceeded{% elif approaching %}state-approaching{% else %}state-ontrack{% endif %}"><span class="state-dot"></span>{% if row.status == 'Exceeded' %}Over budget{% elif approaching %}Approaching limit{% else %}On track{% endif %}</span></div><span class="budget-menu" aria-hidden="true">•••</span></div>
+        <div class="budget-amount-row"><span>Spent</span><strong>₹{{ '%.2f'|format(row.actual_expense) }}</strong><span class="budget-of">of ₹{{ '%.2f'|format(row.budget) }}</span></div>
+        <div class="budget-progress-track" role="progressbar" aria-label="{{ row.category }} budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ [percent, 100]|min|round|int }}"><span class="{% if row.status == 'Exceeded' %}fill-exceeded{% elif approaching %}fill-approaching{% endif %}" style="width:{{ [percent, 100]|min }}%"></span></div>
+        <div class="budget-foot-row"><span>₹{{ '%.2f'|format(row.remaining_budget) }} {% if row.remaining_budget < 0 %}over limit{% else %}remaining{% endif %}</span><span>{{ '%.0f'|format(percent) }}%</span></div>
+      </article>
+    {% endfor %}</div>{% else %}<div class="empty-state budget-empty"><span class="empty-state-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span><strong>No budgets for {{ month }}</strong><span>Create a category budget to see monthly spending progress here.</span></div>{% endif %}
+  </section>
+</section>
+{% endblock %}

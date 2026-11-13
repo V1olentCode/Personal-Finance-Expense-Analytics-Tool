@@ -1,5 +1,30 @@
-{% extends 'base.html' %}{% block title %}Transactions{% endblock %}{% block heading %}Transactions{% endblock %}
-{% block content %}<section class="welcome-row"><p class="muted">Review and filter your financial activity.</p><a class="button primary" href="#upload">＋ Import CSV</a></section>
-<article class="panel upload-panel" id="upload"><div><h2>Import transactions</h2><p>CSV columns: date, description, amount, type. Dates must use YYYY-MM-DD.</p></div><form method="post" enctype="multipart/form-data"><input type="file" name="file" accept=".csv,text/csv" required><button class="button primary">Upload CSV</button></form></article>
-<article class="panel"><div class="panel-heading"><div><h2>All transactions</h2><p>{{ transactions|length }} matching records</p></div></div><form class="filters" method="get"><input type="month" name="month" value="{{ month }}"><select name="type"><option value="">All types</option><option value="income" {{ 'selected' if request.args.get('type') == 'income' }}>Income</option><option value="expense" {{ 'selected' if request.args.get('type') == 'expense' }}>Expense</option></select><select name="category"><option value="">All categories</option>{% for category in categories %}<option {{ 'selected' if request.args.get('category') == category }}>{{ category }}</option>{% endfor %}</select><input name="search" placeholder="Search description" value="{{ request.args.get('search','') }}"><input type="date" name="start_date" value="{{ request.args.get('start_date','') }}"><input type="date" name="end_date" value="{{ request.args.get('end_date','') }}"><button class="button secondary">Filter</button></form>
-<div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th class="right">Amount</th></tr></thead><tbody>{% for t in transactions %}<tr><td>{{ t.date }}</td><td class="strong-cell">{{ t.description }}</td><td><span class="category-chip">{{ t.category }}</span></td><td><span class="type-chip {{ t.type }}">{{ t.type|title }}</span></td><td class="right amount {{ t.type }}">{{ '+' if t.type == 'income' else '−' }}₹{{ '%.2f'|format(t.amount) }}</td></tr>{% else %}<tr><td class="empty-cell" colspan="5">No transactions found. Upload a CSV or adjust your filters.</td></tr>{% endfor %}</tbody></table></div></article>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Transactions{% endblock %}
+{% block heading %}Transactions{% endblock %}
+{% block content %}
+<section class="page-intro">
+  <div><p class="page-description">A complete view of your financial activity.</p></div>
+  <a class="button button-primary" href="#upload"><span aria-hidden="true">＋</span> Import CSV</a>
+</section>
+
+<section class="panel upload-panel" id="upload" aria-labelledby="upload-title">
+  <div class="upload-copy"><div class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 14.5v4h14v-4"/></svg></div><div><h2 id="upload-title">Import transactions</h2><p>Upload a CSV with date, description, amount and type columns. Dates use YYYY-MM-DD.</p></div></div>
+  <form class="upload-form" method="post" enctype="multipart/form-data"><label class="file-picker"><span class="file-picker-label">Choose CSV</span><input type="file" name="file" accept=".csv,text/csv" required><span class="file-name">CSV file · up to 5 MB</span></label><button class="button button-primary" type="submit">Upload file <span aria-hidden="true">→</span></button></form>
+</section>
+
+<section class="panel transactions-panel" aria-labelledby="transactions-title">
+  <div class="panel-heading panel-heading-spaced"><div><div class="heading-with-icon"><span class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h15m0 0-3-3m3 3-3 3M20 17H5m0 0 3 3m-3-3 3-3"/></svg></span><h2 id="transactions-title">Transaction history</h2></div><p>Search, filter and review your activity.</p></div><span class="record-count">{{ transactions|length }} <span>records</span></span></div>
+  <form class="filter-bar" method="get" aria-label="Filter transactions">
+    <label class="sr-only" for="filter-month">Month</label><input id="filter-month" type="month" name="month" value="{{ month }}">
+    <label class="sr-only" for="filter-type">Transaction type</label><select id="filter-type" name="type"><option value="">All types</option><option value="income" {{ 'selected' if request.args.get('type') == 'income' }}>Income</option><option value="expense" {{ 'selected' if request.args.get('type') == 'expense' }}>Expense</option></select>
+    <label class="sr-only" for="filter-category">Category</label><select id="filter-category" name="category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category }}" {{ 'selected' if request.args.get('category') == category }}>{{ category }}</option>{% endfor %}</select>
+    <label class="search-field"><span class="sr-only">Search description</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.2 4.2"/></svg><input name="search" placeholder="Search transactions" value="{{ request.args.get('search','') }}"></label>
+    <div class="date-filters"><label class="sr-only" for="start-date">From date</label><input id="start-date" type="date" name="start_date" value="{{ request.args.get('start_date','') }}"><span>to</span><label class="sr-only" for="end-date">To date</label><input id="end-date" type="date" name="end_date" value="{{ request.args.get('end_date','') }}"></div>
+    <button class="button button-secondary" type="submit">Apply filters</button>
+  </form>
+  <div class="table-wrap"><table class="transaction-table"><thead><tr><th scope="col">Date</th><th scope="col">Description</th><th scope="col">Category</th><th scope="col">Type</th><th scope="col" class="align-right">Amount</th></tr></thead><tbody>
+    {% for t in transactions %}<tr><td class="date-cell">{{ t.date }}</td><td><span class="transaction-name">{{ t.description }}</span></td><td><span class="category-chip">{{ t.category }}</span></td><td><span class="type-chip {{ t.type }}"><span class="type-dot"></span>{{ t.type|title }}</span></td><td class="align-right amount-cell {{ t.type }}">{{ '+' if t.type == 'income' else '−' }}₹{{ '%.2f'|format(t.amount) }}</td></tr>
+    {% else %}<tr><td class="empty-table-cell" colspan="5"><div class="empty-state"><span class="empty-state-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 9h8M8 13h5"/></svg></span><strong>No transactions found</strong><span>Try changing your filters or upload a transaction CSV to get started.</span><a class="button button-secondary" href="#upload">Import transactions</a></div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}
