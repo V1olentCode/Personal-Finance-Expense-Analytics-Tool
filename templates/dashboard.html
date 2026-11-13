@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Overview{% endblock %}
+{% block eyebrow %}YOUR FINANCIAL SPACE{% endblock %}
+{% block heading %}Welcome back.{% endblock %}
+{% block page_subtitle %}<p class="page-subtitle">Your finances, thoughtfully organized.</p>{% endblock %}
+{% block content %}
+<section class="overview-section all-time-section">
+  <div class="section-heading"><div><span class="section-kicker">LIFETIME PERFORMANCE</span><h2>All-time Overview</h2></div></div>
+  <section class="summary-grid">
+    <article class="metric-card"><div class="metric-top"><span>Total balance</span><span class="metric-icon violet">◈</span></div><div class="metric-value">₹{{ '%.2f'|format(summary.balance) }}</div><div class="metric-note">Income less expenses</div><span class="scope-label">ALL-TIME</span></article>
+    <article class="metric-card"><div class="metric-top"><span>Total income</span><span class="metric-icon green">↗</span></div><div class="metric-value">₹{{ '%.2f'|format(summary.income) }}</div><div class="metric-note">Across all transactions</div><span class="scope-label">ALL-TIME</span></article>
+    <article class="metric-card"><div class="metric-top"><span>Total expenses</span><span class="metric-icon orange">↘</span></div><div class="metric-value">₹{{ '%.2f'|format(summary.expenses) }}</div><div class="metric-note">Across all transactions</div><span class="scope-label">ALL-TIME</span></article>
+  </section>
+  <section class="chart-grid">
+    <article class="panel chart-panel"><div class="panel-heading"><div><h2>Expense overview</h2><p>All-time spending trend</p></div><span class="pill">All time</span></div><div class="chart-wrap"><canvas id="monthlyChart" data-labels='{{ summary.month_labels|tojson }}' data-values='{{ summary.month_values|tojson }}'></canvas></div></article>
+    <article class="panel chart-panel"><div class="panel-heading"><div><h2>By category</h2><p>All-time expense breakdown</p></div></div><div class="donut-wrap"><canvas id="categoryChart" data-labels='{{ summary.category_labels|tojson }}' data-values='{{ summary.category_values|tojson }}'></canvas></div></article>
+  </section>
+</section>
+
+<section class="overview-section monthly-section">
+  <div class="section-heading monthly-section-heading">
+    <div><span class="section-kicker">SELECTED PERIOD</span><h2>Monthly Overview — {{ month_label }}</h2></div>
+    <form class="month-form" method="get"><label for="month">MONTH</label><input id="month" name="month" type="month" value="{{ month }}"><button class="button secondary">View</button></form>
+  </div>
+  <section class="summary-grid">
+    <article class="metric-card"><div class="metric-top"><span>Monthly income</span><span class="metric-icon green">↗</span></div><div class="metric-value">₹{{ '%.2f'|format(monthly_summary.income) }}</div><div class="metric-note">Income in {{ month_label }}</div></article>
+    <article class="metric-card"><div class="metric-top"><span>Monthly expenses</span><span class="metric-icon orange">↘</span></div><div class="metric-value">₹{{ '%.2f'|format(monthly_summary.expenses) }}</div><div class="metric-note">Expenses in {{ month_label }}</div></article>
+    <article class="metric-card"><div class="metric-top"><span>Monthly net savings</span><span class="metric-icon violet">◈</span></div><div class="metric-value">₹{{ '%.2f'|format(monthly_summary.net_savings) }}</div><div class="metric-note">Income less expenses</div></article>
+  </section>
+  <section class="chart-grid">
+    <article class="panel chart-panel"><div class="panel-heading"><div><h2>Daily expense trend</h2><p>Spending by date in {{ month_label }}</p></div></div><div class="chart-wrap">{% if not monthly_summary.expense_trend_labels %}<div class="chart-empty">No expense data for {{ month_label }}</div>{% endif %}<canvas id="monthlyTrendChart" data-labels='{{ monthly_summary.expense_trend_labels|tojson }}' data-values='{{ monthly_summary.expense_trend_values|tojson }}'></canvas></div></article>
+    <article class="panel chart-panel"><div class="panel-heading"><div><h2>Monthly categories</h2><p>Expense breakdown for {{ month_label }}</p></div></div><div class="donut-wrap">{% if not monthly_summary.category_labels %}<div class="chart-empty">No expense data for {{ month_label }}</div>{% endif %}<canvas id="monthlyCategoryChart" data-labels='{{ monthly_summary.category_labels|tojson }}' data-values='{{ monthly_summary.category_values|tojson }}'></canvas></div></article>
+  </section>
+  <section class="lower-grid">
+    <article class="panel"><div class="panel-heading"><div><h2>Monthly budgets</h2><p>Budget progress for {{ month_label }}</p></div><a class="text-link" href="{{ url_for('web.budgets', month=month) }}">Manage budgets →</a></div>
+      {% if budget_results %}<div class="budget-list">{% for row in budget_results %}<div class="budget-item"><div class="budget-label"><strong>{{ row.category }}</strong><span>₹{{ '%.0f'|format(row.actual_expense) }} <span class="muted">of ₹{{ '%.0f'|format(row.budget) }}</span></span></div><div class="progress"><span style="width:{{ [((row.actual_expense / row.budget * 100) if row.budget else (100 if row.actual_expense else 0)), 100]|min }}%" class="{% if row.status == 'Exceeded' %}over{% endif %}"></span></div></div>{% endfor %}</div>{% else %}<div class="empty-inline">No budgets set for {{ month_label }}. <a href="{{ url_for('web.budgets', month=month) }}">Create one</a></div>{% endif %}
+    </article>
+    <article class="panel"><div class="panel-heading"><div><h2>Recent transactions</h2><p>Latest activity in {{ month_label }}</p></div><a class="text-link" href="{{ url_for('web.transactions', month=month) }}">See all →</a></div>
+      {% if transactions %}<div class="transaction-list">{% for t in transactions %}<div class="transaction-row"><div class="trans-icon {{ 'income' if t.type == 'income' else 'expense' }}">{{ '↗' if t.type == 'income' else '↘' }}</div><div class="trans-description"><strong>{{ t.description }}</strong><small>{{ t.category }} · {{ t.date }}</small></div><strong class="amount {{ t.type }}">{{ '+' if t.type == 'income' else '−' }}₹{{ '%.2f'|format(t.amount) }}</strong></div>{% endfor %}</div>{% else %}<div class="empty-inline">No transactions in {{ month_label }}. <a href="{{ url_for('web.transactions', month=month) }}">View transactions</a></div>{% endif %}
+    </article>
+  </section>
+</section>
+{% endblock %}

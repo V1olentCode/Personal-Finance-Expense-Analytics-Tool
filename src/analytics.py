@@ -39,6 +39,9 @@ def categorize_expenses(df):
 
 
 def calculate_total_expenses(df):
+    if df.empty:
+        return 0.0
+
     expenses = df[
         df["type"].astype(str).str.strip().str.lower() == "expense"
     ].copy()
@@ -57,6 +60,11 @@ def calculate_total_expenses(df):
 
 
 def calculate_monthly_expenses(df):
+    if df.empty:
+        return pd.Series(
+            dtype="float64", index=pd.Index([], name="month"), name="amount"
+        )
+
     expenses = df[
         df["type"].astype(str).str.strip().str.lower() == "expense"
     ].copy()
@@ -81,6 +89,11 @@ def calculate_monthly_expenses(df):
 
 
 def calculate_category_expenses(df):
+    if df.empty:
+        return pd.Series(
+            dtype="float64", index=pd.Index([], name="category"), name="amount"
+        )
+
     if "category" not in df.columns:
         df = categorize_expenses(df)
 

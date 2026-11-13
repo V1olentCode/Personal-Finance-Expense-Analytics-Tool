@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <title>{% block title %}Pennywise{% endblock %} · Pennywise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('pennywise-theme')||'dark'}catch(_){document.documentElement.dataset.theme='dark'}</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="{{ url_for('web.dashboard') }}" aria-label="Pennywise home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17.5 10 12l3.2 3.1L20 7.5M14.5 7.5H20V13"/></svg></span>
+        <span class="brand-name">Pennywise<span>.</span></span>
+      </a>
+      <div class="nav-caption">WORKSPACE</div>
+      <div class="nav-tagline">Money management</div>
+      <nav class="primary-nav">
+        <a class="nav-link {% if request.endpoint == 'web.dashboard' %}active{% endif %}" href="{{ url_for('web.dashboard') }}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="10.5" width="7" height="10" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Overview</span></a>
+        <a class="nav-link {% if request.endpoint == 'web.transactions' %}active{% endif %}" href="{{ url_for('web.transactions') }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15m0 0-3-3m3 3-3 3M20 17H5m0 0 3 3m-3-3 3-3"/></svg><span>Transactions</span></a>
+        <a class="nav-link {% if request.endpoint == 'web.budgets' %}active{% endif %}" href="{{ url_for('web.budgets') }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg><span>Budgets</span></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="account-chip"><span class="account-avatar">DA</span><span class="account-copy"><strong>Dev Account</strong><small>Personal finance dashboard</small></span></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="page-heading"><div class="eyebrow">{% block eyebrow %}PERSONAL FINANCE{% endblock %}</div><h1>{% block heading %}Overview{% endblock %}</h1>{% block page_subtitle %}{% endblock %}</div>
+        <div class="top-actions"><button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode" aria-pressed="false"><svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2m0 15v2m9.5-9.5h-2m-15 0h-2m16.2-6.7-1.4 1.4M6.7 17.3l-1.4 1.4m13.4 0-1.4-1.4M6.7 6.7 5.3 5.3"/></svg><svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg></button><a class="icon-button" href="{{ url_for('web.report_download', month=request.values.get('month','')) }}" aria-label="Download PDF report" title="Download PDF report"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11m0 0 4-4m-4 4-4-4M5 16.5v3h14v-3"/></svg></a><span class="user-avatar" aria-label="Personal account">P</span></div>
+      </header>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<div class="flashes" role="status">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
